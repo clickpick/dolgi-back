@@ -238,4 +238,8 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     public function totalDebtValue() {
         return $this->debtors()->sum('debt_value');
     }
+
+    public function debtValueForDebtor(User $debtor) {
+        return $this->debtLogs()->where('debtor_id', $debtor->id)->sum('value');
+    }
 }
