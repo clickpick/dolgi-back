@@ -3,6 +3,7 @@
 use App\Jobs\VkBot\AcceptDebtor;
 use App\Jobs\VkBot\ClearActions;
 use App\Jobs\VkBot\DebtorList;
+use App\Jobs\VkBot\RequestPayoff;
 use App\Jobs\VkBot\SelectDebtor;
 use App\Jobs\VkBot\ShowActiveDebtors;
 use App\Jobs\VkBot\ShowDebtorHistory;
@@ -18,5 +19,6 @@ return [
     VkCommand::CANCEL => ClearActions::class,
     VkCommand::SHOW_HISTORY => ShowDebtorHistory::class,
     VkCommand::TOTAL_PAYOFF => TotalDebtorPayoff::class,
-    VkCommand::SHOW_ACTIVE_DEBTORS => ShowActiveDebtors::class
+    VkCommand::SHOW_ACTIVE_DEBTORS => ShowActiveDebtors::class,
+    VkCommand::REQUEST_PAYOFF => RequestPayoff::class
 ];

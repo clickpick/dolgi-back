@@ -12,6 +12,7 @@ class VkCommand {
     const SHOW_HISTORY = 'show_history';
     const TOTAL_PAYOFF = 'total_payoff';
     const SHOW_ACTIVE_DEBTORS = 'show_active_debtors';
+    const REQUEST_PAYOFF = 'request_payoff';
 
     private $type;
     private $params;

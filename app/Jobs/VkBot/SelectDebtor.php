@@ -6,6 +6,7 @@ use App\Services\OutgoingMessage;
 use App\Services\VkClient;
 use App\Services\VkCommand;
 use App\Services\VkKeyboard;
+use App\Services\VkPayButton;
 use App\Services\VkTextButton;
 use App\User;
 use App\VkAction;
@@ -39,9 +40,33 @@ class SelectDebtor extends VkBotJob
             'debtor_id' => $debtor->id
         ]));
 
+        $debtValue = $this->user->debtValueForDebtor($debtor);
+
         $keyboard = new VkKeyboard();
         $keyboard->addButton($showHistoryBtn);
-        $keyboard->addButton($totalPayoffBtn);
+
+        if ($debtValue != 0) {
+            $keyboard->addButton($totalPayoffBtn);
+        }
+
+        if ($debtValue < 0) {
+            $vkPayBtn = new VkPayButton([
+                'action' => 'pay-to-user',
+                'amount' => abs($debtValue),
+                'description' => 'Погашение долга',
+                'user_id' => $debtor->vk_user_id
+            ]);
+            $keyboard->addButton($vkPayBtn);
+        }
+
+        if ($debtValue > 0) {
+            $vkPayRequestBtn = new VkTextButton('Запросить перевод');
+            $vkPayRequestBtn->setCommand(new VkCommand(VkCommand::REQUEST_PAYOFF, [
+                'debtor_id' => $debtor->id
+            ]));
+            $keyboard->addButton($vkPayRequestBtn);
+        }
+
         $keyboard->addButton(VkTextButton::cancel());
 
         $message->setKeyboard($keyboard);

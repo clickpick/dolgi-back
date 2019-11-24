@@ -11,15 +11,19 @@ use VK\Exceptions\VKClientException;
 
 class VkClient
 {
+
+    const GROUP_TOKEN = 'group';
+    const APP_TOKEN = 'app';
+
     protected $client;
     private $accessToken;
 
     private const API_VERSION = '5.103';
 
-    public function __construct()
+    public function __construct($tokenType = self::GROUP_TOKEN)
     {
         $this->client = new VKApiClient(self::API_VERSION, 'ru');
-        $this->accessToken = config('services.vk.group.service_key');
+        $this->accessToken = config('services.vk.' . $tokenType . '.service_key');
     }
 
     public function getUsers($ids, array $fields)
