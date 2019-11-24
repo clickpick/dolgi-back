@@ -38,7 +38,7 @@ class RequestPayoff extends VkBotJob
 
         try {
             $friendList = (new VkClient(VkClient::APP_TOKEN))->getFriends($this->user->id);
-            if (!in_array($debtor->id, $friendList)) {
+            if (!in_array($debtor->vk_user_id, $friendList)) {
                 $this->user->sendVkMessage(new OutgoingMessage('Запросить перевод можно только у друга'));
                 return;
             }
