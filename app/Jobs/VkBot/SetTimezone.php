@@ -16,7 +16,7 @@ class SetTimezone extends VkBotJob
     public function handle()
     {
 
-        $client = new Client('ezavalishin');
+        $client = new Client(config('services.geonames.username'));
 
         try {
             $response = $client->timezone([

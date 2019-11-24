@@ -8,5 +8,8 @@ return [
             'secret' => env('VK_GROUP_SECRET'),
             'service_key' => env('VK_GROUP_SERVICE_KEY')
         ]
+    ],
+    'geonames' => [
+        'username' => env('GEONAMES_USERNAME')
     ]
 ];
