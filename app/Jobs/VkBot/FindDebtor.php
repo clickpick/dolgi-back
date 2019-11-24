@@ -26,7 +26,7 @@ class FindDebtor extends VkBotJob
             $vkId = Str::before($vkId, ' ');
 
             try {
-                $vkUser = (new VkClient())->getUsers($vkId, ['first_name', 'last_name']);
+                $vkUser = (new VkClient())->getUsers($vkId, ['first_name', 'last_name', 'photo_id']);
             } catch (\Exception $e) {
                 dispatch(new StartAddingDebtor($this->incomeMessage));
                 return;
@@ -56,9 +56,14 @@ class FindDebtor extends VkBotJob
         $keyboard->addButton($acceptBtn);
         $keyboard->addButton(VkTextButton::cancel());
 
-        $message = new OutgoingMessage("Это {$vkUser['first_name']} {$vkUser['last_name']}?");
-        $message->setKeyboard($keyboard);
 
+        $message = new OutgoingMessage("Это {$vkUser['first_name']} {$vkUser['last_name']}?");
+
+        if (isset($vkUser['photo_id'])) {
+            $message->addAttachment('photo' . $vkUser['photo_id']);
+        }
+
+        $message->setKeyboard($keyboard);
         $this->user->sendVkMessage($message);
         $this->user->clearActions();
     }
