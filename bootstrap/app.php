@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__.'/../vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 (new Laravel\Lumen\Bootstrap\LoadEnvironmentVariables(
     dirname(__DIR__)
@@ -21,9 +21,9 @@ $app = new Laravel\Lumen\Application(
     dirname(__DIR__)
 );
 
- $app->withFacades();
+$app->withFacades();
 
- $app->withEloquent();
+$app->withEloquent();
 
 /*
 |--------------------------------------------------------------------------
@@ -61,9 +61,9 @@ $app->singleton(
 //     App\Http\Middleware\VkCallbackAuth::class
 // ]);
 
- $app->routeMiddleware([
-     'vk-callback-auth' => App\Http\Middleware\VkCallbackAuth::class,
- ]);
+$app->routeMiddleware([
+    'vk-callback-auth' => App\Http\Middleware\VkCallbackAuth::class,
+]);
 
 /*
 |--------------------------------------------------------------------------
@@ -76,12 +76,13 @@ $app->singleton(
 |
 */
 
- $app->register(App\Providers\AppServiceProvider::class);
+$app->register(App\Providers\AppServiceProvider::class);
 // $app->register(App\Providers\AuthServiceProvider::class);
- $app->register(App\Providers\EventServiceProvider::class);
+$app->register(App\Providers\EventServiceProvider::class);
 
- $app->register(Illuminate\Redis\RedisServiceProvider::class);
- $app->register(Laravel\Tinker\TinkerServiceProvider::class);
+$app->register(Illuminate\Redis\RedisServiceProvider::class);
+$app->register(Laravel\Tinker\TinkerServiceProvider::class);
+$app->register(Lorisleiva\LaravelDeployer\LaravelDeployerServiceProvider::class);
 
 
 if ($app->environment() !== 'production') {
@@ -102,7 +103,7 @@ if ($app->environment() !== 'production') {
 $app->router->group([
     'namespace' => 'App\Http\Controllers',
 ], function ($router) {
-    require __DIR__.'/../routes/web.php';
+    require __DIR__ . '/../routes/web.php';
 });
 
 
