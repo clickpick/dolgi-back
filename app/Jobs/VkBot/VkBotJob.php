@@ -19,6 +19,8 @@ class VkBotJob extends Job
     {
         $this->incomeMessage = $incomeMessage;
         $this->user = $incomeMessage->getUser();
+
+        $this->connection = 'sync';
     }
 
     /**
