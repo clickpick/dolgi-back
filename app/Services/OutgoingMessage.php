@@ -13,6 +13,7 @@ class OutgoingMessage
      */
     private $recipient;
     private $randomId;
+    private $attachments = [];
 
     private $model;
 
@@ -50,9 +51,11 @@ class OutgoingMessage
         ];
 
         if ($this->vkKeyboard) {
-            $request = array_merge($request, [
-                'keyboard' => json_encode($this->vkKeyboard->toArray(), JSON_UNESCAPED_UNICODE)
-            ]);
+            $request['keyboard'] = json_encode($this->vkKeyboard->toArray(), JSON_UNESCAPED_UNICODE);
+        }
+
+        if (!empty($this->attachments)) {
+            $request['attachment'] = implode(',', $this->attachments);
         }
 
         return $request;
@@ -65,5 +68,9 @@ class OutgoingMessage
         ]);
 
         $this->setRandomId($this->model->id);
+    }
+
+    public function addAttachment(string $attachment) {
+        $this->attachments[] = $attachment;
     }
 }
