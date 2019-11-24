@@ -38,7 +38,9 @@ class DebtorList extends VkBotJob
             $emoji = $debtor->pivot->debt_value < 0 ? '➖' : '➕';
             $value = $emoji . number_format(abs($debtor->pivot->debt_value), 0, '.', ' ');
 
-            $btn = new VkTextButton("{$debtor->first_name} {$debtor->last_name} {$value}");
+            $firstName = mb_substr($debtor->first_name, 0, 1) . '.';
+
+            $btn = new VkTextButton("{$firstName} {$debtor->last_name} {$value}");
             $btn->setCommand(new VkCommand(VkCommand::SELECT_DEBTOR, [
                 'user_id' => $debtor->id
             ]));
