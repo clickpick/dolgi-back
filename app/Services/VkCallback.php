@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Events\GotMessagesAllowed;
+use App\Events\GotMessagesDenied;
 use App\Events\GotNewMessage;
 
 class VkCallback {
@@ -35,6 +37,13 @@ class VkCallback {
 
             case self::MESSAGE_NEW:
                 event(new GotNewMessage($this->getObject()));
+                break;
+
+            case self::MESSAGE_ALLOW:
+                event(new GotMessagesAllowed($this->getObject()));
+                break;
+            case self::MESSAGE_DENY:
+                event(new GotMessagesDenied($this->getObject()));
                 break;
 
             default:

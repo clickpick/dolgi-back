@@ -3,12 +3,16 @@
 namespace App\Providers;
 
 use App\Events\DebtLogSaved;
+use App\Events\GotMessagesAllowed;
+use App\Events\GotMessagesDenied;
 use App\Events\GotNewMessage;
 use App\Events\UserCreated;
 use App\Listeners\CalcDebtValues;
 use App\Listeners\EnableMessages;
 use App\Listeners\FillPersonalDataFromVk;
 use App\Listeners\ParseIncomeMessage;
+use App\Listeners\SetMessagesAllowed;
+use App\Listeners\SetMessagesDenied;
 use Laravel\Lumen\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
@@ -28,6 +32,13 @@ class EventServiceProvider extends ServiceProvider
         ],
         DebtLogSaved::class => [
             CalcDebtValues::class
+        ],
+
+        GotMessagesAllowed::class => [
+            SetMessagesAllowed::class
+        ],
+        GotMessagesDenied::class => [
+            SetMessagesDenied::class
         ]
     ];
 }
