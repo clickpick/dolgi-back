@@ -2,14 +2,11 @@
 
 namespace App\Jobs\VkBot;
 
+use App\Services\Matex;
 use App\Services\OutgoingMessage;
-use App\Services\VkClient;
-use App\Services\VkCommand;
 use App\Services\VkKeyboard;
-use App\Services\VkTextButton;
 use App\User;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
 use Spatie\Regex\Regex;
 
 class WriteDebt extends VkBotJob
@@ -25,16 +22,18 @@ class WriteDebt extends VkBotJob
 
         $strings = new Collection(explode("\n", $this->incomeMessage->getText()));
 
-        $result = $strings->reduce(function($carry, $string) {
-            $regex = Regex::match('/[\+\-]?\d+/m', $string);
+        $result = $strings->reduce(function ($carry, $string) {
+            $regex = Regex::match('/([-+*\/]?\d+(\.\d+)?)*/', $string);
             $value = $regex->result();
 
             if (!$value) {
                 return $carry;
             }
 
+            $result = (new Matex())->execute($value);
+
             return array_merge([[
-                'value' => $value,
+                'value' => $result,
                 'comment' => trim(str_replace($value, '', $string))
             ]], $carry);
         }, []);
