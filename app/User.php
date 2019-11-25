@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Events\DebtsSynced;
 use App\Events\UserCreated;
 use App\Services\OutgoingMessage;
 use App\Services\VkClient;
@@ -13,6 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Laravel\Lumen\Auth\Authorizable;
 use Spatie\Regex\Regex;
 
@@ -59,6 +61,12 @@ use Spatie\Regex\Regex;
  * @property-read int|null $debtors_count
  * @property-read Collection|DebtLog[] $debtLogs
  * @property-read int|null $debt_logs_count
+ * @property-read Collection|User[] $creditors
+ * @property-read int|null $creditors_count
+ * @property-read Collection|SyncRequest[] $initedSyncRequests
+ * @property-read int|null $inited_sync_requests_count
+ * @property-read Collection|SyncRequest[] $receivedSyncRequests
+ * @property-read int|null $received_sync_requests_count
  */
 class User extends Model implements AuthenticatableContract, AuthorizableContract
 {
@@ -90,7 +98,24 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     {
         return $this->belongsToMany(User::class, 'debtors', 'user_id', 'debtor_id')
             ->withTimestamps()
-            ->withPivot('debt_value');
+            ->withPivot(['debt_value', 'is_syncing']);
+    }
+
+    public function creditors()
+    {
+        return $this->belongsToMany(User::class, 'debtors', 'debtor_id', 'user_id')
+            ->withTimestamps()
+            ->withPivot(['debt_value', 'is_syncing']);
+    }
+
+    public function initedSyncRequests()
+    {
+        return $this->hasMany(SyncRequest::class, 'initiator_id');
+    }
+
+    public function receivedSyncRequests()
+    {
+        return $this->hasMany(SyncRequest::class, 'acceptor_id');
     }
 
     public function debtLogs()
@@ -143,7 +168,6 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      */
     public static function getByVkId($vkId): ?self
     {
-
         if (!$vkId) {
             return null;
         }
@@ -230,16 +254,56 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         return $date->utcOffset($this->utc_offset);
     }
 
-    public function setUtcOffset($offset) {
+    public function setUtcOffset($offset)
+    {
         $this->utc_offset = $offset;
         $this->save();
     }
 
-    public function totalDebtValue() {
+    public function totalDebtValue()
+    {
         return $this->debtors()->sum('debt_value');
     }
 
-    public function debtValueForDebtor(User $debtor) {
+    public function isDebtorSynced(User $debtor) {
+        return DB::table('debtors')->where('user_id', $this->id)->where('debtor_id', $debtor->id)->where('is_syncing', true)->exists();
+    }
+
+    public function debtValueForDebtor(User $debtor)
+    {
+        if ($this->isDebtorSynced($debtor)) {
+            return $this->debtLogs()->where('debtor_id', $debtor->id)->sum('value') - $debtor->debtLogs()->where('debtor_id', $this->id)->sum('value');
+        }
+
         return $this->debtLogs()->where('debtor_id', $debtor->id)->sum('value');
+    }
+
+    public function crossDebtUsers()
+    {
+        $debtors = $this->debtors;
+        $creditors = $this->creditors;
+
+        return $debtors->intersect($creditors);
+    }
+
+    public function hasCrossDebtUsers()
+    {
+        return $this->crossDebtUsers()->isNotEmpty();
+    }
+
+    public function isCrossDebt(User $debtor)
+    {
+        return DB::table('debtors')->where('user_id', $this->id)->where('debtor_id', $debtor->id)->exists()
+            && DB::table('debtors')->where('user_id', $debtor->id)->where('debtor_id', $this->id)->exists();
+    }
+
+    public function syncWithUser(User $user) {
+        DB::table('debtors')->where('user_id', $this->id)->where('debtor_id', $user->id)->update(['is_syncing' => true]);
+        DB::table('debtors')->where('user_id', $user->id)->where('debtor_id', $this->id)->update(['is_syncing' => true]);
+
+        $this->receivedSyncRequests()->where('initiator_id', $user->id)->delete();
+        $this->initedSyncRequests()->where('acceptor_id', $user->id)->delete();
+
+        event(new DebtsSynced($this, $user));
     }
 }

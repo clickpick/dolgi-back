@@ -3,11 +3,13 @@
 namespace App\Providers;
 
 use App\Events\DebtLogSaved;
+use App\Events\DebtsSynced;
 use App\Events\GotMessagesAllowed;
 use App\Events\GotMessagesDenied;
 use App\Events\GotNewMessage;
 use App\Events\UserCreated;
 use App\Listeners\CalcDebtValues;
+use App\Listeners\CalcDebtValuesForSyncedDebtors;
 use App\Listeners\EnableMessages;
 use App\Listeners\FillPersonalDataFromVk;
 use App\Listeners\ParseIncomeMessage;
@@ -39,6 +41,10 @@ class EventServiceProvider extends ServiceProvider
         ],
         GotMessagesDenied::class => [
             SetMessagesDenied::class
+        ],
+
+        DebtsSynced::class => [
+            CalcDebtValuesForSyncedDebtors::class
         ]
     ];
 }

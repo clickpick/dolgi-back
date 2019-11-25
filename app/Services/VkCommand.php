@@ -13,6 +13,8 @@ class VkCommand {
     const TOTAL_PAYOFF = 'total_payoff';
     const SHOW_ACTIVE_DEBTORS = 'show_active_debtors';
     const REQUEST_PAYOFF = 'request_payoff';
+    const REQUEST_CROSS_DEBT = 'request_cross_debt';
+    const ACCEPT_CROSS_DEBT = 'accept_cross_debt';
 
     private $type;
     private $params;

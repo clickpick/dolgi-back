@@ -54,9 +54,11 @@ class DebtLog extends Model
         return $this->belongsTo(User::class, 'debtor_id');
     }
 
-    public function getFormattedDebtValue()
+    public function getFormattedDebtValue($factor = 1)
     {
-        $emoji = $this->value < 0 ? '➖' : '➕';
-        return $emoji . number_format(abs($this->value), 0, '.', ' ');
+        $value = $this->value * $factor;
+
+        $emoji = $value < 0 ? '➖' : '➕';
+        return $emoji . number_format(abs($value), 0, '.', ' ');
     }
 }

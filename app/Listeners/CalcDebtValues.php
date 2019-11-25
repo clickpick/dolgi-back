@@ -5,6 +5,7 @@ namespace App\Listeners;
 use App\Events\DebtLogSaved;
 use App\Events\ExampleEvent;
 use App\Events\GotNewMessage;
+use App\User;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
@@ -31,11 +32,11 @@ class CalcDebtValues
         $debtLog = $event->debtLog;
 
         $user = $debtLog->user;
-        $debtorId = $debtLog->debtor_id;
+        $debtor = User::find($debtLog->debtor_id);
 
-        $value = $user->debtLogs()->where('debtor_id', $debtorId)->sum('value');
+        $value = $user->debtValueForDebtor($debtor);
 
-        $user->debtors()->updateExistingPivot($debtorId, [
+        $user->debtors()->updateExistingPivot($debtor->id, [
             'debt_value' => $value
         ]);
     }

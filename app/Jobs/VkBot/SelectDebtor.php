@@ -21,7 +21,7 @@ class SelectDebtor extends VkBotJob
      */
     public function handle()
     {
-        $debtor = User::find($this->incomeMessage->getCommand()->getParams()['user_id']);
+        $debtor = $this->user->debtors()->where('users.id', $this->incomeMessage->getCommand()->getParams()['user_id'])->first();
 
         $this->user->setAction(VkAction::WAIT_DEBT, [
             'user_id' => $debtor->id
@@ -65,6 +65,14 @@ class SelectDebtor extends VkBotJob
                 'debtor_id' => $debtor->id
             ]));
             $keyboard->addButton($vkPayRequestBtn);
+        }
+
+        if ($this->user->isCrossDebt($debtor) && !$debtor->pivot->is_syncing) {
+            $requestCrossDebtBtn = new VkTextButton('Запросить синхронизацию');
+            $requestCrossDebtBtn->setCommand(new VkCommand(VkCommand::REQUEST_CROSS_DEBT, [
+                'debtor_id' => $debtor->id
+            ]));
+            $keyboard->addButton($requestCrossDebtBtn);
         }
 
         $keyboard->addButton(VkTextButton::cancel());
