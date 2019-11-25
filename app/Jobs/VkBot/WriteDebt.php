@@ -8,6 +8,7 @@ use App\Services\VkCommand;
 use App\Services\VkKeyboard;
 use App\Services\VkTextButton;
 use App\User;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Spatie\Regex\Regex;
 
@@ -22,19 +23,32 @@ class WriteDebt extends VkBotJob
     {
         $debtor = User::find($this->user->getAction()->params['user_id']);
 
+        $strings = new Collection(explode("\n", $this->incomeMessage->getText()));
 
-        $regex = Regex::match('/[\+\-]?\d+/m', $this->incomeMessage->getText());
-        $value = $regex->result();
+        $result = $strings->reduce(function($carry, $string) {
+            $regex = Regex::match('/[\+\-]?\d+/m', $string);
+            $value = $regex->result();
 
-        if (!$value) {
+            if (!$value) {
+                return $carry;
+            }
+
+            return array_merge([[
+                'value' => $value,
+                'comment' => trim(str_replace($value, '', $string))
+            ]], $carry);
+        }, []);
+
+
+        if (empty($result)) {
             $message = new OutgoingMessage("Не найдена сумма, попробуй еще раз");
             $this->user->sendVkMessage($message);
             return;
         }
 
-        $comment = trim(str_replace($value, '', $this->incomeMessage->getText()));
-
-        $this->user->addDebt($value, $comment, $debtor);
+        foreach ($result as $item) {
+            $this->user->addDebt($item['value'], $item['comment'], $debtor);
+        }
 
         $message = new OutgoingMessage('Записано!');
         $message->setKeyboard(VkKeyboard::starting());
