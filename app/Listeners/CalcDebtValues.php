@@ -32,6 +32,10 @@ class CalcDebtValues
         $debtLog = $event->debtLog;
 
         $user = $debtLog->user;
+
+        /**
+         * @var User $debtor
+         */
         $debtor = User::find($debtLog->debtor_id);
 
         $value = $user->debtValueForDebtor($debtor);
@@ -39,5 +43,13 @@ class CalcDebtValues
         $user->debtors()->updateExistingPivot($debtor->id, [
             'debt_value' => $value
         ]);
+
+        if ($user->isDebtorSynced($debtor)) {
+            $value = $debtor->debtValueForDebtor($user);
+
+            $debtor->debtors()->updateExistingPivot($user->id, [
+                'debt_value' => $value
+            ]);
+        }
     }
 }

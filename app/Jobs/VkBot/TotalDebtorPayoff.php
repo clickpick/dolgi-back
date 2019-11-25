@@ -18,7 +18,7 @@ class TotalDebtorPayoff extends VkBotJob
         $debtorId = $command->getParams()['debtor_id'];
         $debtor = User::findOrFail($debtorId);
 
-        $totalDebtValue = $this->user->debtLogs()->where('debtor_id', $debtorId)->sum('value');
+        $totalDebtValue = $this->user->debtValueForDebtor($debtor);
 
         $this->user->addDebt($totalDebtValue * (-1), 'Тотальное погашение', $debtor);
 
