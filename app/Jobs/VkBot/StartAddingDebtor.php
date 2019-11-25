@@ -23,7 +23,7 @@ class StartAddingDebtor extends VkBotJob
     {
         $this->user->setAction(VkAction::WAIT_DEBTOR);
 
-        $message = new OutgoingMessage('Ты можешь указать пользователя через @');
+        $message = new OutgoingMessage('Ты можешь указать пользователя через @ или введи имя друга');
         $message->setKeyboard(VkKeyboard::cancel());
 
         $this->user->sendVkMessage($message);

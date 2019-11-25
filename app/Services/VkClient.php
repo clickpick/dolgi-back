@@ -41,15 +41,22 @@ class VkClient
 
     /**
      * @param $vkUserId
+     * @param null $fields
      * @return array
      * @throws VKApiException
      * @throws VKClientException
      */
-    public function getFriends($vkUserId)
+    public function getFriends($vkUserId, $fields = null)
     {
-        $result = $this->client->friends()->get($this->accessToken, [
+        $request = [
             'user_id' => $vkUserId
-        ]);
+        ];
+
+        if ($fields) {
+            $request['fields'] = $fields;
+        }
+
+        $result = $this->client->friends()->get($this->accessToken, $request);
 
         return $result['items'] ?? [];
     }
