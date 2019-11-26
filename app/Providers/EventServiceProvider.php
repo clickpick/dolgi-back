@@ -13,6 +13,7 @@ use App\Listeners\CalcDebtValuesForSyncedDebtors;
 use App\Listeners\EnableMessages;
 use App\Listeners\FillPersonalDataFromVk;
 use App\Listeners\ParseIncomeMessage;
+use App\Listeners\SendNotificationToSyncedDebt;
 use App\Listeners\SetMessagesAllowed;
 use App\Listeners\SetMessagesDenied;
 use Laravel\Lumen\Providers\EventServiceProvider as ServiceProvider;
@@ -33,7 +34,8 @@ class EventServiceProvider extends ServiceProvider
             ParseIncomeMessage::class
         ],
         DebtLogSaved::class => [
-            CalcDebtValues::class
+            CalcDebtValues::class,
+            SendNotificationToSyncedDebt::class
         ],
 
         GotMessagesAllowed::class => [
